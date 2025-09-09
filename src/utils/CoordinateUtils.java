@@ -2,7 +2,8 @@ package utils;
 
 public class CoordinateUtils {
 
-    public static int[] parseCoordinate(String input) {
+    // converte input do usuario em letras "A4" para coordenadas numericas "0,4"
+    public int[] parseCoordinate(String input) {
         if (input == null || input.length() < 2) return null;
 
         int i = 0;
@@ -29,15 +30,19 @@ public class CoordinateUtils {
         }
     }
 
+    // formata as coordenadas numericas (0,0; 13,5 lidas pelo back-end em letras B6, AB6 para output)
     public static String formatCoordinate(int x, int y) {
-        StringBuilder colBuilder = new StringBuilder();
-        int col = x;
+        if (x < 0) return "?" + (y + 1);
 
-        do {
-            colBuilder.insert(0, (char)('A' + (col % 26)));
-            col = col / 26 - 1;
-        } while (col >= 0);
+        StringBuilder sb = new StringBuilder();
+        int num = x;
 
-        return colBuilder.toString() + (y + 1);
+        while (num >= 0) {
+            sb.insert(0, (char) ('A' + (num % 26)));
+            num = (num / 26) - 1;
+        }
+
+        return sb.toString() + (y + 1);
     }
+
 }

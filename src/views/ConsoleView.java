@@ -4,6 +4,7 @@ import controllers.GameController;
 import controllers.ShotResult;
 import models.*;
 import java.util.*;
+import utils.*;
 
 public class ConsoleView {
     private GameController controller;
@@ -14,6 +15,7 @@ public class ConsoleView {
         this.scanner = new Scanner(System.in);
     }
 
+    // começa o jogo, ativa o initializeGame do controller e coloca os navios
     public void startGame() {
         System.out.println("=== BATALHA NAVAL ===");
         System.out.println("Selecione a dificuldade:");
@@ -38,14 +40,13 @@ public class ConsoleView {
         gameLoop();
     }
 
+    // interface de colocação de navios do usuário
     private void placeUserShips() {
         System.out.println("\n=== POSICIONAMENTO DE NAVIOS ===");
         System.out.println("Seu tabuleiro:");
         controller.getUserBoard().display(true);
 
-        ShipType[] shipTypes = controller.getUserBoard().getSize() == 10 ? Difficulty.EASY.getShipTypes() :
-                controller.getUserBoard().getSize() == 15 ? Difficulty.MEDIUM.getShipTypes() :
-                        Difficulty.HARD.getShipTypes();
+        ShipType[] shipTypes = controller.getCurrentShipTypes();
 
         for (ShipType shipType : shipTypes) {
             for (int i = 0; i < shipType.getCount(); i++) {
@@ -65,7 +66,7 @@ public class ConsoleView {
                         String direction = getStringInput("Horizontal? (s/n): ");
                         boolean isHorizontal = direction.equalsIgnoreCase("s");
 
-                        Ship ship = createShip(shipType);
+                        Ship ship = controller.createShip(shipType);
                         placed = controller.placeUserShip(ship, coords[0], coords[1], isHorizontal);
 
                         if (!placed) {
@@ -84,17 +85,7 @@ public class ConsoleView {
         System.out.println("\nTodos os navios posicionados! Preparando para começar o jogo...");
     }
 
-    private Ship createShip(ShipType shipType) {
-        switch (shipType.getName()) {
-            case "Porta-avioes": return new AircraftCarrier();
-            case "Cruzador": return new Cruiser();
-            case "Fragata": return new Frigate();
-            case "Destroyer": return new Destroyer();
-            case "Submarino": return new Submarine();
-            default: return null;
-        }
-    }
-
+    // interface loop do jogo
     private void gameLoop() {
         System.out.println("\n=== INICIO DO JOGO ===");
 
@@ -120,6 +111,7 @@ public class ConsoleView {
         System.out.println("\nObrigado por jogar!");
     }
 
+    // interface da vez do usuario
     private void playerTurn() {
         System.out.println("\n=== SUA VEZ ===");
 
@@ -133,7 +125,7 @@ public class ConsoleView {
         while (!validShot) {
             try {
                 String coordInput = getStringInput("Informe a coordenada para atirar (ex: A1): ");
-                int[] coords = parseCoordinate(coordInput);
+                int[] coords = CoordinateUtils.parseCoordinate(coordInput);
 
                 if (coords == null) {
                     System.out.println("Coordenada invalida!");
@@ -171,6 +163,7 @@ public class ConsoleView {
         System.out.println("Navios restantes do computador: " + computerShipsAlive.size());
     }
 
+    // interface da vez do computador
     private void computerTurn() {
         System.out.println("\n=== VEZ DO COMPUTADOR ===");
 
@@ -179,15 +172,15 @@ public class ConsoleView {
         switch (result.getType()) {
             case HIT:
                 System.out.println("O computador acertou seu navio em " +
-                        formatCoordinate(result.getX(), result.getY()) + "!");
+                        CoordinateUtils.formatCoordinate(result.getX(), result.getY()) + "!");
                 break;
             case MISS:
                 System.out.println("O computador atirou em " +
-                        formatCoordinate(result.getX(), result.getY()) + " e errou!");
+                        CoordinateUtils.formatCoordinate(result.getX(), result.getY()) + " e errou!");
                 break;
             case SUNK:
                 System.out.println("O computador afundou seu " + result.getShip().getName() +
-                        " em " + formatCoordinate(result.getX(), result.getY()) + "!");
+                        " em " + CoordinateUtils.formatCoordinate(result.getX(), result.getY()) + "!");
                 break;
         }
 
@@ -195,45 +188,7 @@ public class ConsoleView {
         System.out.println("Seus navios restantes: " + userShipsAlive.size());
     }
 
-    private int[] parseCoordinate(String input) {
-        if (input == null || input.length() < 2) return null;
-
-        int i = 0;
-        while (i < input.length() && Character.isLetter(input.charAt(i))) {
-            i++;
-        }
-
-        if (i == 0) return null;
-
-        String letterPart = input.substring(0, i).toUpperCase();
-        String numberPart = input.substring(i);
-
-        try {
-            int col = 0;
-            for (int j = 0; j < letterPart.length(); j++) {
-                col = col * 26 + (letterPart.charAt(j) - 'A');
-            }
-
-            int row = Integer.parseInt(numberPart) - 1;
-
-            return new int[]{col, row};
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private String formatCoordinate(int x, int y) {
-        StringBuilder colBuilder = new StringBuilder();
-        int col = x;
-
-        do {
-            colBuilder.insert(0, (char)('A' + (col % 26)));
-            col = col / 26 - 1;
-        } while (col >= 0);
-
-        return colBuilder.toString() + (y + 1);
-    }
-
+    // helper para forçar numero dentro de um intervalo (exemplo 1-3 na escolha da dificuldade) - só pra interface de console
     private int getIntInput(String prompt, int min, int max) {
         while (true) {
             try {
@@ -253,6 +208,7 @@ public class ConsoleView {
         }
     }
 
+    // pega a mensagem do usuario (so pra interface de console)
     private String getStringInput(String prompt) {
         System.out.print(prompt);
         return scanner.nextLine();

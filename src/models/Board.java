@@ -38,6 +38,7 @@ public class Board {
         return x >= 0 && x < size && y >= 0 && y < size;
     }
 
+    // coloca o navio no tabuleiro, conferindo posicionamento, retornando 0 caso não foi possível colocar e 1 caso sucesso
     public boolean placeShip(Ship ship, int x, int y, boolean isHorizontal) {
         if (!checkPlacement(ship, x, y, isHorizontal)) {
             return false;

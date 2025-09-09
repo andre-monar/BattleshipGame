@@ -12,6 +12,7 @@ public class GameController {
     private List<Ship> userShips;
     private List<Ship> computerShips;
 
+    // define as configurações de jogo
     public void initializeGame(Difficulty difficulty) {
         this.difficulty = difficulty;
         int boardSize = difficulty.getBoardSize();
@@ -26,12 +27,23 @@ public class GameController {
         System.out.println((isPlayerTurn ? "Player" : "Computer") + " goes first");
     }
 
+    // chama placeShip pra por o navio no tabuleiro e registra o navio na lista userShips
     public boolean placeUserShip(Ship ship, int x, int y, boolean isHorizontal) {
         boolean placed = userBoard.placeShip(ship, x, y, isHorizontal);
         if (placed) {
             userShips.add(ship);
         }
         return placed;
+    }
+
+    // retorna quantidade de navios pra cada dificuldade
+    public ShipType[] getCurrentShipTypes() {
+        switch (this.difficulty) {
+            case EASY: return Difficulty.EASY.getShipTypes();
+            case MEDIUM: return Difficulty.MEDIUM.getShipTypes();
+            case HARD: return Difficulty.HARD.getShipTypes();
+            default: return Difficulty.EASY.getShipTypes();
+        }
     }
 
     public void placeComputerShips() {
@@ -64,7 +76,8 @@ public class GameController {
         }
     }
 
-    private Ship createShip(ShipType shipType) {
+    // cria instâncias de cada navio do jogo, para que possam ser marcados como destruídos, por exemplo
+    public Ship createShip(ShipType shipType) {
         switch (shipType.getName()) {
             case "Porta-avioes": return new AircraftCarrier();
             case "Cruzador": return new Cruiser();
