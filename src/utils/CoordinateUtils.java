@@ -3,7 +3,7 @@ package utils;
 public class CoordinateUtils {
 
     // converte input do usuario em letras "A4" para coordenadas numericas "0,4"
-    public int[] parseCoordinate(String input) {
+    public static int[] parseCoordinate(String input) {
         if (input == null || input.length() < 2) return null;
 
         int i = 0;
