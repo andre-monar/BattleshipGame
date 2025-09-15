@@ -56,7 +56,7 @@ public class ConsoleView {
                 while (!placed) {
                     try {
                         String coordInput = getStringInput("Informe a coordenada (ex: A1): ");
-                        int[] coords = parseCoordinate(coordInput);
+                        int[] coords = CoordinateUtils.parseCoordinate(coordInput);
 
                         if (coords == null) {
                             System.out.println("Coordenada invalida!");
